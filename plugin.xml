@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+	id="cordova-plugin-ftp-client"
+	version="1.1.0">
+
+	<name>FTP Client</name>
+	<description>FTP Client</description>
+	<license>MIT</license>
+    <keywords>cordova,ftp</keywords>
+    <repo></repo>
+    <issue></issue>
+
+	<permission name="android.permission.INTERNET" />
+    <permission name="android.permission.READ_EXTERNAL_STORAGE" />
+    <permission name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+	<js-module src="www/ftpClient.js" name="FtpClient">
+		<clobbers target="cordova.plugins.ftpclient" />
+	</js-module>
+
+    <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="FtpClient">
+                <param name="android-package" value="org.apache.cordova.FtpClient"/>
+            </feature>
+        </config-file>
+		<source-file src="src/android/FtpClient.java" target-dir="src/org/apache/cordova" />
+    </platform>
+</plugin>

@@ -1,0 +1,25 @@
+{
+	"name": "cordova-plugin-ftp-client",
+	"version": "1.1.0",
+    "description": "FTP Client",
+	"cordova": {
+		"id": "cordova-plugin-ftp-client",
+		"platforms": [
+			"android"
+		]
+	},
+	"keywords": [
+		"cordova",
+		"ftp",
+		"android",
+		"install",
+		"ecosystem:cordova",
+		"cordova-android"
+	],
+	"engines": [
+		{
+			"name": "cordova",
+			"version": ">=3.0.0"
+		}
+	]
+}
