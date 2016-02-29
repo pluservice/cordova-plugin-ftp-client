@@ -25,6 +25,8 @@
                 <param name="android-package" value="org.apache.cordova.FtpClient"/>
             </feature>
         </config-file>
+
+		<source-file src="libs/commons-net.jar" target-dir="libs" />
 		<source-file src="src/android/FtpClient.java" target-dir="src/org/apache/cordova" />
     </platform>
 </plugin>
