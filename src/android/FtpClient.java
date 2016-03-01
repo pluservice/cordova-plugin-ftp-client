@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +26,9 @@ public class FtpClient extends CordovaPlugin {
 			if ((args == null) || (args.length() < 4)) {
 				throw new IllegalArgumentException("Parametri errati");
 			}
+
+			// Result
+			PluginResult result = null;
 
 			// Parameters
 			URL Url = new URL(args.getString(0));
@@ -62,12 +66,17 @@ public class FtpClient extends CordovaPlugin {
 			Client.setFileType(FTP.BINARY_FILE_TYPE);
 
 			// Actions
-			if (action.equals("get")) {
-				get(Client, Url, RemoteFile, LocalFile);
+			if (action.equals("delete")) {
+				result = delete(Client, Url, RemoteFile, LocalFile);
 			}
-
-			if (action.equals("put")) {
-				put(Client, Url, RemoteFile, LocalFile);
+			else if (action.equals("get")) {
+				result = get(Client, Url, RemoteFile, LocalFile);
+			}
+			else if (action.equals("list")) {
+				result = list(Client, Url, RemoteFile, LocalFile);
+			}
+			else if (action.equals("put")) {
+				result = put(Client, Url, RemoteFile, LocalFile);
 			}
 
 			// Client
@@ -75,12 +84,7 @@ public class FtpClient extends CordovaPlugin {
 			Client.disconnect();
 
 			// Ok
-			callbackContext.sendPluginResult(
-				new PluginResult(
-					PluginResult.Status.OK,
-					"file://" + LocalFile
-				)
-			);
+			callbackContext.sendPluginResult(result);
 		}
 		catch (JSONException E) {
 			// Error
@@ -129,7 +133,7 @@ public class FtpClient extends CordovaPlugin {
 
 		// Change directories
 		if (items.length > 1) {
-			for (int index = 0; index < (items.length - 1); index++) {
+			for (int index = 0; index < items.length; index++) {
 				if (!items[index].trim().equals("")) {
 					Client.changeWorkingDirectory(items[index]);
 				}
@@ -161,7 +165,25 @@ public class FtpClient extends CordovaPlugin {
 		}
 	}
 
-	private void get(FTPClient Client, URL Url, String RemoteFile, String LocalFile) throws IOException {
+	private PluginResult delete(FTPClient Client, URL Url, String RemoteFile, String LocalFile) throws IOException {
+		// Result
+		String file = RemoteFile;
+
+		// Change
+		RemoteFile = change(Client, RemoteFile);
+
+		// Delete
+		Boolean result = Client.deleteFile(RemoteFile);
+
+		// Return
+		return
+			new PluginResult(
+				(result ? PluginResult.Status.OK : PluginResult.Status.ERROR),
+				file
+			);
+	}
+
+	private PluginResult get(FTPClient Client, URL Url, String RemoteFile, String LocalFile) throws IOException {
 		// Change
 		RemoteFile = change(Client, RemoteFile);
 
@@ -178,9 +200,39 @@ public class FtpClient extends CordovaPlugin {
 
 		buffer.flush();
 		buffer.close();
+
+		// Return
+		return
+			new PluginResult(
+				PluginResult.Status.OK,
+				"file://" + LocalFile
+			);
 	}
 
-	private void put(FTPClient Client, URL Url, String RemoteFile, String LocalFile) throws IOException {
+	private PluginResult list(FTPClient Client, URL Url, String RemoteFile, String LocalFile) throws IOException {
+		// Change
+		RemoteFile = change(Client, RemoteFile);
+
+		// Result
+		JSONArray result = new JSONArray();
+
+		// List
+		FTPFile[] files = Client.listFiles();
+		if ((files != null) && (files.length > 0)) {
+			for (FTPFile file : files) {
+				result.put(file.getName());
+			}
+		}
+
+		// Return
+		return
+			new PluginResult(
+				PluginResult.Status.OK,
+				result
+			);
+	}
+
+	private PluginResult put(FTPClient Client, URL Url, String RemoteFile, String LocalFile) throws IOException {
 		// Change
 		RemoteFile = change(Client, RemoteFile);
 
@@ -193,5 +245,12 @@ public class FtpClient extends CordovaPlugin {
 		Client.storeFile(RemoteFile, buffer);
 
 		buffer.close();
+
+		// Return
+		return
+			new PluginResult(
+				PluginResult.Status.OK,
+				"file://" + LocalFile
+			);
 	}
 }
