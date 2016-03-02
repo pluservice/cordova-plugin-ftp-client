@@ -205,7 +205,7 @@ public class FtpClient extends CordovaPlugin {
 		return
 			new PluginResult(
 				PluginResult.Status.OK,
-				"file://" + LocalFile
+				RemoteFile
 			);
 	}
 
